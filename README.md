@@ -239,35 +239,6 @@ We are working on implementing proper authentication through:
 4. **`get_cds_experiments`** — List available CERN experiments for filtering
 5. **`get_cds_document_types`** — List available document types for filtering
 
-## Example Prompts
-
-### Search for repositories
-- "Search CDS for LHCb notes about trigger systems from 2023, then fetch the files for the most recent one."
-- "Find ATLAS papers about machine learning published in the last year."
-
-### Understand a project
-- "Show me the latest CMS conference papers and get detailed information about the first three."
-- "What experiments are available in CDS? Then search for recent theoretical physics papers."
-
-### Find fitting examples
-- "Find CDS documents about ROOT data analysis with example code."
-- "Search for ALICE papers that include Python analysis scripts."
-
-### View LHCb software stack code
-- "Find LHCb software documentation and analysis frameworks in CDS."
-
-### Analyze a project structure
-- "Get detailed metadata for this CDS record and analyze its file structure."
-
-### Find usage context
-- "Search for papers that cite this specific CDS document."
-
-### Track releases
-- "Find the latest versions of ATLAS analysis software documentation."
-
-### Find framework configurations
-- "Search for CDS records containing configuration files for physics analysis frameworks."
-
 ## Development
 
 ```bash
