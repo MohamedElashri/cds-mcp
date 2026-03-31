@@ -127,15 +127,25 @@ class CDSSearchResponse(BaseModel):
             "facets": self.facets,
         }
 
+
 class CDSCollection(BaseModel):
     """Represents a CDS collection."""
-    name: str = Field(description="Internal collection name (used in search or 'cc' parameter)")
+
+    name: str = Field(
+        description="Internal collection name (used in search or 'cc' parameter)"
+    )
     display_name: str = Field(description="Human-readable name of the collection")
-    subcollections: list["CDSCollection"] = Field(default_factory=list, description="List of sub-collections within this collection")
+    subcollections: list["CDSCollection"] = Field(
+        default_factory=list,
+        description="List of sub-collections within this collection",
+    )
+
 
 # Resolve forward references for recursive model
 CDSCollection.model_rebuild()
 
+
 class CDSCollectionResponse(BaseModel):
     """Response containing a list of CDS collections."""
+
     collections: list[CDSCollection]
