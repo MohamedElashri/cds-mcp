@@ -129,30 +129,3 @@ def test_tool_parameter_validation():
     except Exception as e:
         print(f"    ❌ Unexpected error: {e}")
         assert False, f"Unexpected error: {e}"
-
-
-async def main():
-    """Run all MCP server tests."""
-    print("🚀 Starting MCP Server End-to-End Tests\n")
-    
-    # Test 1: Server functionality
-    server_test_passed = await test_mcp_server_tools()
-    
-    # Test 2: Parameter validation
-    validation_test_passed = test_tool_parameter_validation()
-    
-    # Summary
-    print("\n📊 MCP Server Test Summary:")
-    print(f"   Server functionality: {'✅ PASSED' if server_test_passed else '❌ FAILED'}")
-    print(f"   Parameter validation: {'✅ PASSED' if validation_test_passed else '❌ FAILED'}")
-    
-    if server_test_passed and validation_test_passed:
-        print("\n✅ All MCP server tests passed!")
-        return 0
-    else:
-        print("\n❌ Some MCP server tests failed")
-        return 1
-
-
-if __name__ == "__main__":
-    sys.exit(asyncio.run(main()))
