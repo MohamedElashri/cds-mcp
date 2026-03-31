@@ -24,8 +24,8 @@ jobs:
     - name: Run tests
       run: |
         uv run pytest tests/ -v
-        uv run python test_integration.py
-        uv run python test_mcp_server.py
+        uv run python tests/test_integration.py
+        uv run python tests/test_mcp_server.py
 
     - name: Build package
       run: uv build
