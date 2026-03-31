@@ -10,36 +10,45 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "Mohamed Elashri", email = "mohamed.elashri@cern.ch"},
+    {name = "Mohamed Elashri", email = "melashri@cern.ch"},
 ]
-keywords = ["mcp", "cds", "cern", "invenio", "document-server"]
+keywords = ["mcp", "model-context-protocol", "cern", "cds", "document-server", "physics", "research", "hep"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
 ]
 dependencies = [
     "requests>=2.31.0",
-    "pydantic>=2.0.0",
+    "pydantic>=2.5.0",
     "mcp>=1.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/MohamedElashri/cds-mcp"
+Repository = "https://github.com/MohamedElashri/cds-mcp"
+Issues = "https://github.com/MohamedElashri/cds-mcp/issues"
+Documentation = "https://github.com/MohamedElashri/cds-mcp#readme"
+
+[project.scripts]
+cds-mcp = "cds_mcp.server:main"
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0",
-    "responses>=0.23.0",
-    "mypy>=1.0.0",
+    "pytest-cov>=4.0.0",
+    "responses>=0.24.0",
+    "mypy>=1.7.0",
     "black>=23.0.0",
     "ruff>=0.1.0",
 ]
 
-[project.scripts]
-cds-mcp-server = "cds_mcp.server:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -70,3 +79,14 @@ python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+
+[dependency-groups]
+dev = [
+    "black>=26.3.1",
+    "mypy>=1.19.1",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.1.0",
+    "responses>=0.26.0",
+    "ruff>=0.15.8",
+]

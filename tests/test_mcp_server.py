@@ -6,10 +6,12 @@ import json
 import sys
 from io import StringIO
 from unittest.mock import patch
+import pytest
 
 from cds_mcp.server import CDSMCPServer
 
 
+@pytest.mark.asyncio
 async def test_mcp_server_tools():
     """Test MCP server tool listing and execution."""
     print("🔍 Testing MCP server tool functionality...")

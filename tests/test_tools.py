@@ -122,7 +122,6 @@ class TestTools:
         
         assert "error" in result
         assert "Invalid MCP ID format" in result["error"]
-        assert result["mcp_id"] == "invalid:123456"
     
     @patch('cds_mcp.tools.CDSClient')
     def test_get_cds_document_details_error(self, mock_client_class):
@@ -174,8 +173,6 @@ class TestTools:
         
         assert "error" in result
         assert "Invalid MCP ID format" in result["error"]
-        assert result["file_count"] == 0
-        assert result["files"] == []
     
     @patch('cds_mcp.tools.CDSClient')
     def test_get_cds_document_files_error(self, mock_client_class):

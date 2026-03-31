@@ -49,7 +49,7 @@ Add to your `claude_desktop_config.json`:
       "command": "uvx",
       "args": ["cds-mcp"],
       "env": {
-        "CDS_SESSION_COOKIE": "your_session_cookie_here"
+        "CDS_SESSION_COOKIE": "session_cookie_here"
       }
     }
   }

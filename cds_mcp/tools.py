@@ -2,25 +2,24 @@
 
 import logging
 import os
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 from .cds_client import CDSClient, CDSClientError
-from .schema import CDSRecord
 
 logger = logging.getLogger(__name__)
 
 
 def search_cds_documents(
     query: str,
-    experiment: Optional[str] = None,
-    doc_type: Optional[str] = None,
-    from_date: Optional[str] = None,
-    until_date: Optional[str] = None,
+    experiment: str | None = None,
+    doc_type: str | None = None,
+    from_date: str | None = None,
+    until_date: str | None = None,
     size: int = 10,
     sort: str = "mostrecent",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Search CDS documents with various filters.
-    
+
     Args:
         query: Search query string (required)
         experiment: Filter by experiment (e.g., "ATLAS", "CMS", "LHCb", "ALICE")
@@ -29,7 +28,7 @@ def search_cds_documents(
         until_date: End date filter in YYYY-MM-DD format
         size: Number of results to return (max 100, default 10)
         sort: Sort order - "mostrecent", "bestmatch", or "mostcited"
-    
+
     Returns:
         Dictionary containing search results and metadata
     """
@@ -46,9 +45,9 @@ def search_cds_documents(
             size=size,
             sort=sort,
         )
-        
+
         result = search_response.to_mcp_dict()
-        
+
         # Add search parameters for context
         result["search_parameters"] = {
             "query": query,
@@ -59,10 +58,12 @@ def search_cds_documents(
             "size": size,
             "sort": sort,
         }
-        
-        logger.info(f"Search completed: {result['returned_count']} of {result['total_results']} results")
+
+        logger.info(
+            f"Search completed: {result['returned_count']} of {result['total_results']} results"
+        )
         return result
-        
+
     except CDSClientError as e:
         logger.error(f"CDS search failed: {e}")
         return {
@@ -82,31 +83,33 @@ def search_cds_documents(
         }
 
 
-def get_cds_document_details(mcp_id: str) -> Dict[str, Any]:
+def get_cds_document_details(mcp_id: str) -> dict[str, Any]:
     """Get detailed information about a specific CDS document.
-    
+
     Args:
         mcp_id: MCP ID of the document (format: "cds:123456")
-    
+
     Returns:
         Dictionary containing detailed document information
     """
     try:
         # Extract CDS ID from MCP ID
         if not mcp_id.startswith("cds:"):
-            return {"error": f"Invalid MCP ID format: {mcp_id}. Expected format: 'cds:123456'"}
-        
+            return {
+                "error": f"Invalid MCP ID format: {mcp_id}. Expected format: 'cds:123456'"
+            }
+
         cds_id = mcp_id.split(":", 1)[1]
-        
+
         # Get session cookie from environment if available (workaround for authentication)
         session_cookie = os.getenv("CDS_SESSION_COOKIE")
         client = CDSClient(session_cookie=session_cookie)
         record = client.get_record(cds_id)
-        
+
         result = record.to_detailed_dict()
         logger.info(f"Retrieved detailed information for record {cds_id}")
         return result
-        
+
     except CDSClientError as e:
         logger.error(f"Failed to get document details for {mcp_id}: {e}")
         return {
@@ -115,27 +118,29 @@ def get_cds_document_details(mcp_id: str) -> Dict[str, Any]:
         }
 
 
-def get_cds_document_files(mcp_id: str) -> Dict[str, Any]:
+def get_cds_document_files(mcp_id: str) -> dict[str, Any]:
     """Get file information for a specific CDS document.
-    
+
     Args:
         mcp_id: MCP ID of the document (format: "cds:123456")
-    
+
     Returns:
         Dictionary containing file information and download URLs
     """
     try:
         # Extract CDS ID from MCP ID
         if not mcp_id.startswith("cds:"):
-            return {"error": f"Invalid MCP ID format: {mcp_id}. Expected format: 'cds:123456'"}
-        
+            return {
+                "error": f"Invalid MCP ID format: {mcp_id}. Expected format: 'cds:123456'"
+            }
+
         cds_id = mcp_id.split(":", 1)[1]
-        
+
         # Get session cookie from environment if available (workaround for authentication)
         session_cookie = os.getenv("CDS_SESSION_COOKIE")
         client = CDSClient(session_cookie=session_cookie)
         files = client.get_record_files(cds_id)
-        
+
         result = {
             "mcp_id": mcp_id,
             "cds_id": cds_id,
@@ -153,10 +158,10 @@ def get_cds_document_files(mcp_id: str) -> Dict[str, Any]:
             ],
             "base_url": f"https://cds.cern.ch/record/{cds_id}",
         }
-        
+
         logger.info(f"Retrieved {len(files)} files for record {cds_id}")
         return result
-        
+
     except CDSClientError as e:
         logger.error(f"Failed to get files for {mcp_id}: {e}")
         return {
@@ -167,9 +172,9 @@ def get_cds_document_files(mcp_id: str) -> Dict[str, Any]:
         }
 
 
-def get_cds_experiments() -> Dict[str, Any]:
+def get_cds_experiments() -> dict[str, Any]:
     """Get a list of common CERN experiments for filtering.
-    
+
     Returns:
         Dictionary containing experiment information
     """
@@ -183,7 +188,10 @@ def get_cds_experiments() -> Dict[str, Any]:
         "Other Experiments": [
             {"name": "NA61", "description": "NA61/SHINE"},
             {"name": "NA62", "description": "NA62 experiment"},
-            {"name": "COMPASS", "description": "Common Muon and Proton Apparatus for Structure and Spectroscopy"},
+            {
+                "name": "COMPASS",
+                "description": "Common Muon and Proton Apparatus for Structure and Spectroscopy",
+            },
             {"name": "nTOF", "description": "Neutron Time-of-Flight facility"},
         ],
         "Theoretical": [
@@ -191,23 +199,26 @@ def get_cds_experiments() -> Dict[str, Any]:
             {"name": "LPCC", "description": "LHC Physics Centre at CERN"},
         ],
     }
-    
+
     return {
         "experiments": experiments,
         "usage_note": "Use experiment names (e.g., 'ATLAS', 'CMS') as filters in search_cds_documents",
     }
 
 
-def get_cds_document_types() -> Dict[str, Any]:
+def get_cds_document_types() -> dict[str, Any]:
     """Get a list of common CDS document types for filtering.
-    
+
     Returns:
         Dictionary containing document type information
     """
     doc_types = {
         "Publications": [
             {"type": "Article", "description": "Journal articles and papers"},
-            {"type": "Conference Paper", "description": "Conference proceedings and presentations"},
+            {
+                "type": "Conference Paper",
+                "description": "Conference proceedings and presentations",
+            },
             {"type": "Preprint", "description": "Preprints and draft papers"},
         ],
         "Reports": [
@@ -225,7 +236,7 @@ def get_cds_document_types() -> Dict[str, Any]:
             {"type": "Slides", "description": "Presentation slides"},
         ],
     }
-    
+
     return {
         "document_types": doc_types,
         "usage_note": "Use document type names (e.g., 'Article', 'Thesis') as filters in search_cds_documents",
