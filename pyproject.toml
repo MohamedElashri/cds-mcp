@@ -96,3 +96,7 @@ dev = [
     "ruff>=0.15.8",
     "types-requests>=2.33.0.20260327",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["tests/dev"]
