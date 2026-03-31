@@ -37,17 +37,9 @@ jobs:
       run: |
         uv run mypy cds_mcp/
 
-    - name: Run unit tests
+    - name: Run tests
       run: |
         uv run pytest tests/ -v --cov=cds_mcp --cov-report=xml
-
-    - name: Run integration tests
-      run: |
-        uv run python test_integration.py
-
-    - name: Run MCP server tests
-      run: |
-        uv run python test_mcp_server.py
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
