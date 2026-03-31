@@ -104,7 +104,7 @@ class CDSClient:
             params["sf"] = sort_map[sort]
 
         try:
-            response = self.session.get(f"{self.base_url}/search", params=params)
+            response = self.session.get(f"{self.base_url}/search", params=params)  # type: ignore[arg-type]
             response.raise_for_status()
             data = response.json()
 
@@ -151,7 +151,7 @@ class CDSClient:
                 "of": "recjson",
                 "rg": 1,
             }
-            response = self.session.get(f"{self.base_url}/search", params=params)
+            response = self.session.get(f"{self.base_url}/search", params=params)  # type: ignore[arg-type]
             response.raise_for_status()
             data = response.json()
 
@@ -161,7 +161,7 @@ class CDSClient:
                 raise CDSClientError(f"Record {cds_id} not found")
 
         except requests.RequestException as e:
-            if hasattr(e, "response") and e.response.status_code == 404:
+            if hasattr(e, "response") and e.response is not None and e.response.status_code == 404:
                 raise CDSClientError(f"Record {cds_id} not found") from e
             raise CDSClientError(f"Failed to get record {cds_id}: {e}") from e
 
@@ -250,7 +250,7 @@ class CDSClient:
                         break
 
         # Extract keywords and subjects
-        keywords = []
+        keywords: list[str] = []
         subjects = []
 
         # Subject field handling

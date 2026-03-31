@@ -14,7 +14,6 @@ class CDSFile(BaseModel):
     mime_type: str | None = None
 
     @computed_field
-    @property
     def size_mb(self) -> float | None:
         """File size in megabytes."""
         if self.size is None:
@@ -49,19 +48,16 @@ class CDSRecord(BaseModel):
     arxiv_id: str | None = None
 
     @computed_field
-    @property
     def mcp_id(self) -> str:
         """Generate a deterministic MCP ID for this record."""
         return f"cds:{self.cds_id}"
 
     @computed_field
-    @property
     def cds_url(self) -> str:
         """Generate the CDS URL for this record."""
         return f"https://cds.cern.ch/record/{self.cds_id}"
 
     @computed_field
-    @property
     def author_names(self) -> list[str]:
         """Extract just the author names."""
         return [author.name for author in self.authors]

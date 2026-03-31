@@ -15,3 +15,7 @@ dist
 build
 .eggs
 cds_mcp/__pycache__/*
+
+
+## typecheckers 
+.mypy_cache

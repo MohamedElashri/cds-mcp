@@ -30,12 +30,12 @@ logger = logging.getLogger(__name__)
 class CDSMCPServer:
     """MCP server for CDS operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the CDS MCP server."""
         self.server = Server("cds-mcp")
         self._setup_handlers()
 
-    def _setup_handlers(self):
+    def _setup_handlers(self) -> None:
         """Set up MCP request handlers."""
 
         @self.server.list_tools()
@@ -45,8 +45,8 @@ class CDSMCPServer:
             for tool_name, tool_config in MCP_TOOLS.items():
                 tool = Tool(
                     name=tool_name,
-                    description=tool_config["description"],
-                    inputSchema=tool_config["parameters"],
+                    description=str(tool_config["description"]),
+                    inputSchema=tool_config["parameters"],  # type: ignore[arg-type]
                 )
                 tools.append(tool)
 
@@ -69,7 +69,7 @@ class CDSMCPServer:
             try:
                 # Get the tool function and call it
                 tool_function = MCP_TOOLS[name]["function"]
-                result = tool_function(**arguments)
+                result = tool_function(**arguments)  # type: ignore[operator]
 
                 # Format the result as JSON for the MCP client
                 result_text = json.dumps(result, indent=2, default=str)
@@ -88,7 +88,7 @@ class CDSMCPServer:
                     isError=True,
                 )
 
-    async def run(self):
+    async def run(self) -> None:
         """Run the MCP server with stdio transport."""
         logger.info("Starting CDS MCP server with stdio transport")
 
@@ -100,12 +100,12 @@ class CDSMCPServer:
             )
 
 
-def main():
+def main() -> None:
     """Main entry point for the CLI."""
     asyncio.run(run_async())
 
 
-async def run_async():
+async def run_async() -> None:
     """Main async entry point for the CDS MCP server."""
     try:
         server = CDSMCPServer()
