@@ -26,5 +26,5 @@ coverage.xml
 
 ## all hidden folders and files
 .*
-### except .env.example
 !.env.example
+!.github

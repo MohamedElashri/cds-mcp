@@ -1,27 +1,25 @@
 """CERN SSO authentication module for CDS MCP server."""
 
-import json
 import logging
 import os
-import time
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
-from urllib.parse import urljoin
+from typing import Any
 
 import jwt
 import requests
-from cryptography.hazmat.primitives import serialization
 
 logger = logging.getLogger(__name__)
 
 
 class CERNAuthError(Exception):
     """Base exception for CERN authentication errors."""
+
     pass
 
 
 class TokenExpiredError(CERNAuthError):
     """Raised when the access token has expired."""
+
     pass
 
 
@@ -30,9 +28,9 @@ class CERNAuthenticator:
 
     def __init__(
         self,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        audience: Optional[str] = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+        audience: str | None = None,
         token_endpoint: str = "https://auth.cern.ch/auth/realms/cern/api-access/token",
         jwks_endpoint: str = "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/certs",
     ):
@@ -57,10 +55,10 @@ class CERNAuthenticator:
                 "environment variables or pass them to the constructor."
             )
 
-        self._access_token: Optional[str] = None
-        self._token_expires_at: Optional[datetime] = None
-        self._jwks_cache: Optional[Dict[str, Any]] = None
-        self._jwks_cache_expires: Optional[datetime] = None
+        self._access_token: str | None = None
+        self._token_expires_at: datetime | None = None
+        self._jwks_cache: dict[str, Any] | None = None
+        self._jwks_cache_expires: datetime | None = None
 
     def get_access_token(self, force_refresh: bool = False) -> str:
         """Get a valid access token, refreshing if necessary.
@@ -74,11 +72,15 @@ class CERNAuthenticator:
         Raises:
             CERNAuthError: If token acquisition fails
         """
-        if not force_refresh and self._is_token_valid():
+        if (
+            not force_refresh
+            and self._is_token_valid()
+            and self._access_token is not None
+        ):
             return self._access_token
 
         logger.info("Acquiring new access token from CERN SSO")
-        
+
         try:
             # Prepare token request data
             token_data = {
@@ -86,11 +88,11 @@ class CERNAuthenticator:
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
             }
-            
+
             # Only add audience if specified
             if self.audience:
                 token_data["audience"] = self.audience
-            
+
             response = requests.post(
                 self.token_endpoint,
                 data=token_data,
@@ -101,15 +103,17 @@ class CERNAuthenticator:
                 timeout=30,
             )
             response.raise_for_status()
-            
+
             token_data = response.json()
             self._access_token = token_data["access_token"]
-            
+
             # Calculate expiry time (subtract 60 seconds for safety margin)
             expires_in = token_data.get("expires_in", 3600)
             self._token_expires_at = datetime.now() + timedelta(seconds=expires_in - 60)
-            
-            logger.info(f"Successfully acquired access token, expires at {self._token_expires_at}")
+
+            logger.info(
+                f"Successfully acquired access token, expires at {self._token_expires_at}"
+            )
             return self._access_token
 
         except requests.RequestException as e:
@@ -117,7 +121,7 @@ class CERNAuthenticator:
         except KeyError as e:
             raise CERNAuthError(f"Invalid token response format: missing {e}") from e
 
-    def validate_token(self, token: str) -> Dict[str, Any]:
+    def validate_token(self, token: str) -> dict[str, Any]:
         """Validate an access token and return its claims.
 
         Args:
@@ -132,56 +136,58 @@ class CERNAuthenticator:
         try:
             # Get JWKS for signature verification
             jwks = self._get_jwks()
-            
+
             # Decode token header to get key ID
             unverified_header = jwt.get_unverified_header(token)
             kid = unverified_header.get("kid")
-            
+
             if not kid:
                 raise CERNAuthError("Token missing key ID (kid) in header")
-            
+
             # Find the matching key in JWKS
             key_data = None
             for key in jwks.get("keys", []):
                 if key.get("kid") == kid:
                     key_data = key
                     break
-            
+
             if not key_data:
                 raise CERNAuthError(f"Key ID {kid} not found in JWKS")
-            
+
             # Convert JWK to PEM format for verification
             public_key = self._jwk_to_pem(key_data)
-            
+
             # Verify and decode token
-            jwt_options = {"verify_exp": True}
-            jwt_kwargs = {"algorithms": ["RS256"]}
-            
+            jwt_options: dict[str, Any] = {"verify_exp": True}
+            jwt_kwargs: dict[str, Any] = {"algorithms": ["RS256"]}
+
             # Only verify audience if we have one configured
             if self.audience:
                 jwt_options["verify_aud"] = True
                 jwt_kwargs["audience"] = self.audience
             else:
                 jwt_options["verify_aud"] = False
-            
+
             claims = jwt.decode(
                 token,
                 public_key,
-                options=jwt_options,
-                **jwt_kwargs
+                options=jwt_options,  # type: ignore[arg-type]
+                **jwt_kwargs,
             )
-            
-            logger.debug(f"Token validated successfully for subject: {claims.get('sub')}")
+
+            logger.debug(
+                f"Token validated successfully for subject: {claims.get('sub')}"
+            )
             return claims
 
-        except jwt.ExpiredSignatureError:
-            raise TokenExpiredError("Access token has expired")
+        except jwt.ExpiredSignatureError as e:
+            raise TokenExpiredError("Access token has expired") from e
         except jwt.InvalidTokenError as e:
             raise CERNAuthError(f"Token validation failed: {e}") from e
         except Exception as e:
             raise CERNAuthError(f"Unexpected error during token validation: {e}") from e
 
-    def get_auth_headers(self) -> Dict[str, str]:
+    def get_auth_headers(self) -> dict[str, str]:
         """Get HTTP headers for authenticated requests.
 
         Returns:
@@ -197,10 +203,10 @@ class CERNAuthenticator:
         """Check if the current token is valid and not expired."""
         if not self._access_token or not self._token_expires_at:
             return False
-        
+
         return datetime.now() < self._token_expires_at
 
-    def _get_jwks(self) -> Dict[str, Any]:
+    def _get_jwks(self) -> dict[str, Any]:
         """Get JWKS (JSON Web Key Set) for token validation, with caching."""
         # Check cache first
         if (
@@ -211,7 +217,7 @@ class CERNAuthenticator:
             return self._jwks_cache
 
         logger.debug("Fetching JWKS from CERN SSO")
-        
+
         try:
             response = requests.get(
                 self.jwks_endpoint,
@@ -219,27 +225,26 @@ class CERNAuthenticator:
                 timeout=30,
             )
             response.raise_for_status()
-            
+
             self._jwks_cache = response.json()
             # Cache JWKS for 1 hour
             self._jwks_cache_expires = datetime.now() + timedelta(hours=1)
-            
+
             return self._jwks_cache
 
         except requests.RequestException as e:
             raise CERNAuthError(f"Failed to fetch JWKS: {e}") from e
 
-    def _jwk_to_pem(self, jwk_data: Dict[str, Any]) -> bytes:
+    def _jwk_to_pem(self, jwk_data: dict[str, Any]) -> bytes:
         """Convert JWK to PEM format for cryptographic operations."""
         try:
+            import base64
+
             from cryptography.hazmat.primitives.asymmetric import rsa
             from cryptography.hazmat.primitives.serialization import (
                 Encoding,
-                NoEncryption,
-                PrivateFormat,
                 PublicFormat,
             )
-            import base64
 
             # Extract RSA components from JWK
             n = int.from_bytes(
@@ -264,7 +269,7 @@ class CERNAuthenticator:
 
 
 # Global authenticator instance
-_authenticator: Optional[CERNAuthenticator] = None
+_authenticator: CERNAuthenticator | None = None
 
 
 def get_authenticator() -> CERNAuthenticator:
@@ -275,7 +280,7 @@ def get_authenticator() -> CERNAuthenticator:
     return _authenticator
 
 
-def get_auth_headers() -> Dict[str, str]:
+def get_auth_headers() -> dict[str, str]:
     """Convenience function to get authentication headers."""
     return get_authenticator().get_auth_headers()
 

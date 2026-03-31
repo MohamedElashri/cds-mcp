@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cds-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Model Context Protocol server for CERN Document Server (CDS)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -37,6 +37,7 @@ Homepage = "https://github.com/MohamedElashri/cds-mcp"
 Repository = "https://github.com/MohamedElashri/cds-mcp"
 Issues = "https://github.com/MohamedElashri/cds-mcp/issues"
 Documentation = "https://github.com/MohamedElashri/cds-mcp#readme"
+Changelog = "https://github.com/MohamedElashri/cds-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
 cds-mcp = "cds_mcp.server:main"

@@ -23,9 +23,7 @@ class CDSClient:
     """Client for interacting with the CDS (Invenio) REST API."""
 
     def __init__(
-        self, 
-        base_url: str = "https://cds.cern.ch", 
-        use_authentication: bool = True
+        self, base_url: str = "https://cds.cern.ch", use_authentication: bool = True
     ):
         """Initialize the CDS client.
 
@@ -83,7 +81,7 @@ class CDSClient:
             if until_date:
                 search_query += until_date[:4]
 
-        params = {
+        params: dict[str, Any] = {
             "p": search_query,
             "of": "recjson",
             "rg": min(size, 100),  # CDS API limit
@@ -102,9 +100,7 @@ class CDSClient:
         try:
             headers = self._get_request_headers()
             response = self.session.get(
-                f"{self.base_url}/search", 
-                params=params, 
-                headers=headers
+                f"{self.base_url}/search", params=params, headers=headers
             )  # type: ignore[arg-type]
             response.raise_for_status()
             data = response.json()
@@ -147,16 +143,14 @@ class CDSClient:
             CDSClientError: If the record is not found or API request fails
         """
         try:
-            params = {
+            params: dict[str, Any] = {
                 "p": f"recid:{cds_id}",
                 "of": "recjson",
                 "rg": 1,
             }
             headers = self._get_request_headers()
             response = self.session.get(
-                f"{self.base_url}/search", 
-                params=params, 
-                headers=headers
+                f"{self.base_url}/search", params=params, headers=headers
             )  # type: ignore[arg-type]
             response.raise_for_status()
             data = response.json()
@@ -348,12 +342,12 @@ class CDSClient:
 
     def _get_request_headers(self) -> dict[str, str]:
         """Get headers for API requests, including authentication if configured.
-        
+
         Returns:
             Dictionary of HTTP headers
         """
         headers = {}
-        
+
         if self.use_authentication and is_authenticated():
             try:
                 auth_headers = get_auth_headers()
@@ -361,17 +355,19 @@ class CDSClient:
                 logger.debug("Using CERN SSO authentication for API request")
             except CERNAuthError as e:
                 logger.warning(f"Failed to get authentication headers: {e}")
-                logger.info("Proceeding with unauthenticated request (public access only)")
-        
+                logger.info(
+                    "Proceeding with unauthenticated request (public access only)"
+                )
+
         return headers
 
     def is_authenticated(self) -> bool:
         """Check if the client has valid authentication configured.
-        
+
         Returns:
             True if authenticated, False otherwise
         """
         if not self.use_authentication:
             return False
-            
+
         return is_authenticated()

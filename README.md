@@ -223,11 +223,11 @@ The CDS MCP server now supports **proper CERN SSO authentication** using OAuth2/
 
 ## Tools
 
-1. **`search_cds_documents`** — Search CDS with various filters
-2. **`get_cds_document_details`** — Get detailed information about a specific document
-3. **`get_cds_document_files`** — Get file information and download URLs
-4. **`get_cds_experiments`** — List available CERN experiments for filtering
-5. **`get_cds_document_types`** — List available document types for filtering
+1. **`search_cds_documents`**: Search CDS with various filters
+2. **`get_cds_document_details`**: Get detailed information about a specific document
+3. **`get_cds_document_files`**: Get file information and download URLs
+4. **`get_cds_experiments`**: List available CERN experiments for filtering
+5. **`get_cds_document_types`**: List available document types for filtering
 
 ## Development
 

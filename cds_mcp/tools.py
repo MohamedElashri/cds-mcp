@@ -1,11 +1,9 @@
 """MCP tool definitions for CDS operations."""
 
 import logging
-import os
 from typing import Any
 
 from .cds_client import CDSClient, CDSClientError
-from .auth import is_authenticated
 
 logger = logging.getLogger(__name__)
 
