@@ -235,8 +235,8 @@ The CDS MCP server now supports **proper CERN SSO authentication** using OAuth2/
 git clone https://github.com/MohamedElashri/cds-mcp
 cd cds-mcp
 uv sync
-uv run python test_integration.py  # Test real CDS API integration
-uv run python test_mcp_server.py   # Test MCP server functionality
+uv run python tests/test_integration.py  # Test real CDS API integration
+uv run python tests/test_mcp_server.py   # Test MCP server functionality
 ```
 
 ## License
