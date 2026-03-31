@@ -240,6 +240,28 @@ def get_cds_document_types() -> dict[str, Any]:
 
 
 # Tool registry for MCP server
+
+def list_cds_collections() -> str:
+    """List available CDS collections to help users browse instead of search."""
+    try:
+        client = CDSClient(use_authentication=True)
+        response = client.list_collections()
+        
+        result_parts = ["# Available CERN Document Server (CDS) Collections\n"]
+        for col in response.collections:
+            result_parts.append(f"- **{col.display_name}** (Search key: `{col.name}`)")
+            if getattr(col, "subcollections", None):
+                for subcol in col.subcollections:
+                    result_parts.append(f"  - **{subcol.display_name}** (Search key: `{subcol.name}`)")
+            
+        result_parts.append("\n*Tip: You can use the search key as the `doc_type` argument in the search tools, or manually include it in a query (e.g., `collection:\"Articles & Preprints\"`).*")
+        
+        return "\n".join(result_parts)
+    except Exception as e:
+        logger.error(f"Failed to list collections: {e}")
+        return f"Error listing collections: {str(e)}"
+
+
 MCP_TOOLS = {
     "search_cds_documents": {
         "function": search_cds_documents,
@@ -313,6 +335,15 @@ MCP_TOOLS = {
     "get_cds_experiments": {
         "function": get_cds_experiments,
         "description": "Get a list of common CERN experiments that can be used for filtering searches",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+
+    "list_cds_collections": {
+        "function": list_cds_collections,
+        "description": "Browse the hierarchical taxonomy of CERN Document Server (CDS) collections and sub-collections. Use this tool BEFORE searching if you are unsure which collection or category to search in. It returns the exact search keys that can be passed into the `doc_type` argument of `search_cds_documents`.",
         "parameters": {
             "type": "object",
             "properties": {},

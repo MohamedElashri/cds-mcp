@@ -191,6 +191,43 @@ class CDSClient:
         except Exception as e:
             raise CDSClientError(f"Failed to get files for record {cds_id}: {e}") from e
 
+
+    def list_collections(self):
+        """Return a hierarchical list of common CDS collections and sub-collections."""
+        from .schema import CDSCollection, CDSCollectionResponse
+        
+        # Static list of main CDS collections with sub-collections
+        collections = [
+            CDSCollection(name="Articles & Preprints", display_name="Articles & Preprints", subcollections=[
+                CDSCollection(name="Published Articles", display_name="Published Articles"),
+                CDSCollection(name="Preprints", display_name="Preprints"),
+                CDSCollection(name="Theses", display_name="Theses"),
+                CDSCollection(name="Reports", display_name="Reports"),
+                CDSCollection(name="CERN Internal Notes", display_name="CERN Internal Notes"),
+                CDSCollection(name="Committee Documents", display_name="Committee Documents"),
+            ]),
+            CDSCollection(name="Books & Proceedings", display_name="Books & Proceedings", subcollections=[
+                CDSCollection(name="Books", display_name="Books"),
+                CDSCollection(name="Proceedings", display_name="Proceedings"),
+            ]),
+            CDSCollection(name="Presentations & Talks", display_name="Presentations & Talks", subcollections=[
+                CDSCollection(name="Conference Announcements", display_name="Conference Announcements"),
+            ]),
+            CDSCollection(name="Periodicals & Progress Reports", display_name="Periodicals & Progress Reports", subcollections=[
+                CDSCollection(name="Periodicals", display_name="Periodicals"),
+                CDSCollection(name="Progress Reports", display_name="Progress Reports"),
+            ]),
+            CDSCollection(name="Multimedia & Outreach", display_name="Multimedia & Outreach", subcollections=[
+                CDSCollection(name="Photos", display_name="Photos"),
+                CDSCollection(name="Videos", display_name="Videos"),
+                CDSCollection(name="Press", display_name="Press"),
+                CDSCollection(name="Posters", display_name="Posters"),
+                CDSCollection(name="Brochures", display_name="Brochures"),
+                CDSCollection(name="Audio", display_name="Audio"),
+            ])
+        ]
+        return CDSCollectionResponse(collections=collections)
+
     def _parse_record(self, data: dict[str, Any]) -> CDSRecord:
         """Parse a CDS record from API response data.
 

@@ -14,8 +14,6 @@ __pycache__
 dist
 build
 .eggs
-cds_mcp/__pycache__/*
-
 
 ## typecheckers / linters ..etc
 .mypy_cache

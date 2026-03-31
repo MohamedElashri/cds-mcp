@@ -98,7 +98,7 @@ class CERNAuthenticator:
                 data=token_data,
                 headers={
                     "Content-Type": "application/x-www-form-urlencoded",
-                    "User-Agent": "cds-mcp/0.1.0",
+                    "User-Agent": "cds-mcp/0.1.1",
                 },
                 timeout=30,
             )
