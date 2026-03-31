@@ -49,22 +49,22 @@ Add to your `claude_desktop_config.json`:
       "command": "uvx",
       "args": ["cds-mcp"],
       "env": {
-        "CDS_SESSION_COOKIE": "session_cookie_here"
+        "CERN_CLIENT_ID": "your-client-id",
+        "CERN_CLIENT_SECRET": "your-client-secret"
       }
     }
   }
 }
 ```
 
-For **public access only**, omit the `CDS_SESSION_COOKIE`:
+For **public access only**, omit the authentication environment variables:
 
 ```json
 {
   "mcpServers": {
     "cds": {
       "command": "uvx",
-      "args": ["cds-mcp"],
-      "env": {}
+      "args": ["cds-mcp"]
     }
   }
 }
@@ -93,11 +93,11 @@ Global — installs for your user account (works in all projects):
 claude mcp add --scope user cds-mcp -- uvx cds-mcp
 ```
 
-To include authentication, add `-e CDS_SESSION_COOKIE=your_session_cookie_here` before the `--`:
+To include authentication, add the CERN credentials before the `--`:
 
 ```bash
-# Example: Global installation with authentication
-claude mcp add --scope user -e CDS_SESSION_COOKIE=your_session_cookie_here cds-mcp -- uvx cds-mcp
+# Example: Global installation with CERN SSO authentication
+claude mcp add --scope user -e CERN_CLIENT_ID=your_client_id -e CERN_CLIENT_SECRET=your_client_secret cds-mcp -- uvx cds-mcp
 ```
 
 Manual Configuration — you can also manually edit your global config at `~/.claude.json` (on Linux/macOS) or `%APPDATA%\Claude\claude.json` (on Windows):
@@ -109,7 +109,8 @@ Manual Configuration — you can also manually edit your global config at `~/.cl
       "command": "uvx",
       "args": ["cds-mcp"],
       "env": {
-        "CDS_SESSION_COOKIE": "your_session_cookie_here"
+        "CERN_CLIENT_ID": "your_client_id",
+        "CERN_CLIENT_SECRET": "your_client_secret"
       }
     }
   }
@@ -128,7 +129,8 @@ Add to your VS Code `settings.json`:
         "command": "uvx",
         "args": ["cds-mcp"],
         "env": {
-          "CDS_SESSION_COOKIE": "your_session_cookie_here"
+          "CERN_CLIENT_ID": "your_client_id",
+          "CERN_CLIENT_SECRET": "your_client_secret"
         }
       }
     }
@@ -145,7 +147,8 @@ Or add a `.vscode/mcp.json` to your project:
       "command": "uvx",
       "args": ["cds-mcp"],
       "env": {
-        "CDS_SESSION_COOKIE": "your_session_cookie_here"
+        "CERN_CLIENT_ID": "your_client_id",
+        "CERN_CLIENT_SECRET": "your_client_secret"
       }
     }
   }
@@ -163,7 +166,8 @@ Add to your `~/.gemini/settings.json`:
       "command": "uvx",
       "args": ["cds-mcp"],
       "env": {
-        "CDS_SESSION_COOKIE": "your_session_cookie_here"
+        "CERN_CLIENT_ID": "your_client_id",
+        "CERN_CLIENT_SECRET": "your_client_secret"
       }
     }
   }
@@ -182,54 +186,40 @@ cds-mcp
 # Or from source
 uv run cds-mcp
 
-# With authentication
-CDS_SESSION_COOKIE=your_session_cookie_here uvx cds-mcp
+# With CERN SSO authentication
+CERN_CLIENT_ID=your_client_id CERN_CLIENT_SECRET=your_client_secret uvx cds-mcp
 ```
 
 
-## Access Limitations & Authentication
+## Authentication & Access Control
 
-**⚠️ Current Status: Public Access Only**
+### CERN SSO Authentication (Recommended)
 
-This MCP server currently **only accesses public CDS records**. Experiment-specific restricted content (ATLAS/CMS/LHC Internal Notes, etc.) requires authentication that is not yet fully supported.
+The CDS MCP server now supports **proper CERN SSO authentication** using OAuth2/OIDC for accessing restricted content.
 
-### Restricted Collections
+#### Setup Instructions
 
-The following collections in particular require experiment membership and authentication:
-- **ATLAS**: Internal Notes, Communications, Conference Slides
-- **CMS**: Internal Notes, Analysis Notes
-- **LHCb**: Internal Notes, Analysis Notes
-- **ALICE**: Internal Notes, Analysis Notes
+1. **Register your application** in the [CERN Application Portal](https://application-portal.web.cern.ch):
+   - Create a new OIDC application
+   - Select "Confidential Client" type
+   - Note your `Client ID` and `Client Secret`
 
-### Workaround for Restricted Access
-
-**⚠️ TEMPORARY SOLUTION**: If you need access to restricted content, you can use your browser session cookie as a workaround:
-
-1. **Log into CDS** in your browser (https://cds.cern.ch)
-2. **Extract your session cookie**:
-   - **Chrome/Edge**: Open Developer Tools (F12) → Application → Cookies → https://cds.cern.ch → Copy `INVENIOSESSION` value
-   - **Firefox**: Open Developer Tools (F12) → Storage → Cookies → https://cds.cern.ch → Copy `INVENIOSESSION` value  
-   - **Safari**: Develop menu → Show Web Inspector → Storage → Cookies → https://cds.cern.ch → Copy `INVENIOSESSION` value
-3. **Set the environment variable**:
+2. **Configure authentication** by setting environment variables:
    ```bash
-   export CDS_SESSION_COOKIE="session_cookie_here"
+   export CERN_CLIENT_ID="your-client-id"
+   export CERN_CLIENT_SECRET="your-client-secret"
    ```
 
-**Important Notes**:
-- This is a **temporary workaround** while we develop proper authentication
-- Session cookies **expire** and need to be refreshed periodically
-- This method requires **manual cookie management**
-- **Proper CERN SSO integration** is planned for future releases
+3. **Use with MCP clients** - the server will automatically handle token acquisition and refresh.
 
-I'm not sure how happy CERN IT will be happy about this approach. So please be carefull while doing it. Deal with this session cookie as a secret and don't share it with anyone.
+#### Supported Access Levels
 
-### Future Authentication
-
-We are working on implementing proper authentication through:
-- CERN Single Sign-On (SSO) integration
-- OAuth/SAML authentication flows
-- Automatic session management
-
+- **Public Records**: Available without authentication
+- **Restricted Collections**: Requires CERN SSO authentication and appropriate experiment membership
+  - **ATLAS**: Internal Notes, Communications, Conference Slides
+  - **CMS**: Internal Notes, Analysis Notes
+  - **LHCb**: Internal Notes, Analysis Notes
+  - **ALICE**: Internal Notes, Analysis Notes
 
 ## Tools
 

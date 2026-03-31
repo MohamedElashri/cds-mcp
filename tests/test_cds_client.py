@@ -160,12 +160,6 @@ class TestCDSClient:
         custom_client = CDSClient(base_url="https://custom-cds.example.com/")
         assert custom_client.base_url == "https://custom-cds.example.com"
     
-    def test_session_cookie_initialization(self):
-        """Test client initialization with session cookie."""
-        client_with_cookie = CDSClient(session_cookie="test_cookie")
-        assert "INVENIOSESSION" in client_with_cookie.session.cookies
-        assert client_with_cookie.session.cookies["INVENIOSESSION"] == "test_cookie"
-    
     @responses.activate
     def test_parse_record_with_list_affiliation(self):
         """Test parsing record with list affiliation."""

@@ -7,6 +7,7 @@ from typing import Any
 import requests
 from pydantic import ValidationError
 
+from .auth import CERNAuthError, get_auth_headers, is_authenticated
 from .schema import CDSAuthor, CDSFile, CDSRecord, CDSSearchResponse
 
 logger = logging.getLogger(__name__)
@@ -22,17 +23,18 @@ class CDSClient:
     """Client for interacting with the CDS (Invenio) REST API."""
 
     def __init__(
-        self, base_url: str = "https://cds.cern.ch", session_cookie: str | None = None
+        self, 
+        base_url: str = "https://cds.cern.ch", 
+        use_authentication: bool = True
     ):
         """Initialize the CDS client.
 
         Args:
             base_url: Base URL for the CDS instance (default: https://cds.cern.ch)
-            session_cookie: Optional INVENIOSESSION cookie for authenticated access
-                          (WORKAROUND: This is a temporary solution for accessing restricted content.
-                           A proper authentication mechanism is being developed.)
+            use_authentication: Whether to use CERN SSO authentication for restricted content
         """
         self.base_url = base_url.rstrip("/")
+        self.use_authentication = use_authentication
         self.session = requests.Session()
         self.session.headers.update(
             {
@@ -40,12 +42,6 @@ class CDSClient:
                 "Accept": "application/json",
             }
         )
-
-        # Add session cookie if provided (workaround for authentication)
-        if session_cookie:
-            self.session.cookies.set(
-                "INVENIOSESSION", session_cookie, domain="cds.cern.ch"
-            )
 
     def search(
         self,
@@ -104,7 +100,12 @@ class CDSClient:
             params["sf"] = sort_map[sort]
 
         try:
-            response = self.session.get(f"{self.base_url}/search", params=params)  # type: ignore[arg-type]
+            headers = self._get_request_headers()
+            response = self.session.get(
+                f"{self.base_url}/search", 
+                params=params, 
+                headers=headers
+            )  # type: ignore[arg-type]
             response.raise_for_status()
             data = response.json()
 
@@ -151,7 +152,12 @@ class CDSClient:
                 "of": "recjson",
                 "rg": 1,
             }
-            response = self.session.get(f"{self.base_url}/search", params=params)  # type: ignore[arg-type]
+            headers = self._get_request_headers()
+            response = self.session.get(
+                f"{self.base_url}/search", 
+                params=params, 
+                headers=headers
+            )  # type: ignore[arg-type]
             response.raise_for_status()
             data = response.json()
 
@@ -208,8 +214,11 @@ class CDSClient:
             if isinstance(affiliation, list):
                 affiliation = ", ".join(affiliation) if affiliation else None
 
+            full_name = author_data.get("full_name")
+            name_val = full_name if full_name is not None else "Unknown"
+
             author = CDSAuthor(
-                name=author_data.get("full_name", ""),
+                name=name_val,
                 affiliation=affiliation,
                 orcid=None,  # Not typically in CDS format
             )
@@ -336,3 +345,33 @@ class CDSClient:
             return datetime(year, 1, 1)
         except (ValueError, IndexError):
             return datetime.now()
+
+    def _get_request_headers(self) -> dict[str, str]:
+        """Get headers for API requests, including authentication if configured.
+        
+        Returns:
+            Dictionary of HTTP headers
+        """
+        headers = {}
+        
+        if self.use_authentication and is_authenticated():
+            try:
+                auth_headers = get_auth_headers()
+                headers.update(auth_headers)
+                logger.debug("Using CERN SSO authentication for API request")
+            except CERNAuthError as e:
+                logger.warning(f"Failed to get authentication headers: {e}")
+                logger.info("Proceeding with unauthenticated request (public access only)")
+        
+        return headers
+
+    def is_authenticated(self) -> bool:
+        """Check if the client has valid authentication configured.
+        
+        Returns:
+            True if authenticated, False otherwise
+        """
+        if not self.use_authentication:
+            return False
+            
+        return is_authenticated()

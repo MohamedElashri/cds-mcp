@@ -5,6 +5,7 @@ import os
 from typing import Any
 
 from .cds_client import CDSClient, CDSClientError
+from .auth import is_authenticated
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +34,8 @@ def search_cds_documents(
         Dictionary containing search results and metadata
     """
     try:
-        # Get session cookie from environment if available (workaround for authentication)
-        session_cookie = os.getenv("CDS_SESSION_COOKIE")
-        client = CDSClient(session_cookie=session_cookie)
+        # Modern CERN SSO authentication
+        client = CDSClient(use_authentication=True)
         search_response = client.search(
             query=query,
             experiment=experiment,
@@ -101,9 +101,8 @@ def get_cds_document_details(mcp_id: str) -> dict[str, Any]:
 
         cds_id = mcp_id.split(":", 1)[1]
 
-        # Get session cookie from environment if available (workaround for authentication)
-        session_cookie = os.getenv("CDS_SESSION_COOKIE")
-        client = CDSClient(session_cookie=session_cookie)
+        # Modern CERN SSO authentication
+        client = CDSClient(use_authentication=True)
         record = client.get_record(cds_id)
 
         result = record.to_detailed_dict()
@@ -136,9 +135,8 @@ def get_cds_document_files(mcp_id: str) -> dict[str, Any]:
 
         cds_id = mcp_id.split(":", 1)[1]
 
-        # Get session cookie from environment if available (workaround for authentication)
-        session_cookie = os.getenv("CDS_SESSION_COOKIE")
-        client = CDSClient(session_cookie=session_cookie)
+        # Modern CERN SSO authentication
+        client = CDSClient(use_authentication=True)
         files = client.get_record_files(cds_id)
 
         result = {

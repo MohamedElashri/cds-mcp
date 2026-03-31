@@ -24,7 +24,7 @@ class CDSFile(BaseModel):
 class CDSAuthor(BaseModel):
     """Represents an author of a CDS record."""
 
-    name: str
+    name: str | None = None
     affiliation: str | None = None
     orcid: str | None = None
 
@@ -60,7 +60,7 @@ class CDSRecord(BaseModel):
     @computed_field
     def author_names(self) -> list[str]:
         """Extract just the author names."""
-        return [author.name for author in self.authors]
+        return [author.name or "Unknown" for author in self.authors]
 
     def to_mcp_dict(self) -> dict:
         """Convert to a dictionary suitable for MCP tool responses."""
