@@ -9,12 +9,6 @@ A Model Context Protocol (MCP) server for integrating with CERN Document Server 
 - **Access document files** with download URLs and file metadata
 - **Browse experiments and document types** for better search filtering
 
-### Future Authentication
-
-We are working on implementing proper authentication through:
-- CERN Single Sign-On (SSO) integration
-- OAuth/SAML authentication flows
-- Automatic session management
 
 ## Installation
 
@@ -228,6 +222,13 @@ The following collections in particular require experiment membership and authen
 - **Proper CERN SSO integration** is planned for future releases
 
 I'm not sure how happy CERN IT will be happy about this approach. So please be carefull while doing it. Deal with this session cookie as a secret and don't share it with anyone.
+
+### Future Authentication
+
+We are working on implementing proper authentication through:
+- CERN Single Sign-On (SSO) integration
+- OAuth/SAML authentication flows
+- Automatic session management
 
 
 ## Tools
