@@ -207,9 +207,9 @@ The following collections in particular require experiment membership and authen
 
 1. **Log into CDS** in your browser (https://cds.cern.ch)
 2. **Extract your session cookie**:
-   - Open Developer Tools (F12)
-   - Go to Application/Storage → Cookies → https://cds.cern.ch
-   - Copy the value of `INVENIOSESSION`
+   - **Chrome/Edge**: Open Developer Tools (F12) → Application → Cookies → https://cds.cern.ch → Copy `INVENIOSESSION` value
+   - **Firefox**: Open Developer Tools (F12) → Storage → Cookies → https://cds.cern.ch → Copy `INVENIOSESSION` value  
+   - **Safari**: Develop menu → Show Web Inspector → Storage → Cookies → https://cds.cern.ch → Copy `INVENIOSESSION` value
 3. **Set the environment variable**:
    ```bash
    export CDS_SESSION_COOKIE="session_cookie_here"
