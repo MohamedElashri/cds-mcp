@@ -161,7 +161,11 @@ class CDSClient:
                 raise CDSClientError(f"Record {cds_id} not found")
 
         except requests.RequestException as e:
-            if hasattr(e, "response") and e.response is not None and e.response.status_code == 404:
+            if (
+                hasattr(e, "response")
+                and e.response is not None
+                and e.response.status_code == 404
+            ):
                 raise CDSClientError(f"Record {cds_id} not found") from e
             raise CDSClientError(f"Failed to get record {cds_id}: {e}") from e
 
