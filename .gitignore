@@ -19,3 +19,6 @@ cds_mcp/__pycache__/*
 
 ## typecheckers 
 .mypy_cache
+
+## all hidden folders and files
+.*
