@@ -21,11 +21,14 @@ class CDSClientError(Exception):
 class CDSClient:
     """Client for interacting with the CDS (Invenio) REST API."""
     
-    def __init__(self, base_url: str = "https://cds.cern.ch"):
+    def __init__(self, base_url: str = "https://cds.cern.ch", session_cookie: Optional[str] = None):
         """Initialize the CDS client.
         
         Args:
             base_url: Base URL for the CDS instance (default: https://cds.cern.ch)
+            session_cookie: Optional INVENIOSESSION cookie for authenticated access
+                          (WORKAROUND: This is a temporary solution for accessing restricted content.
+                           A proper authentication mechanism is being developed.)
         """
         self.base_url = base_url.rstrip("/")
         self.session = requests.Session()
@@ -33,6 +36,10 @@ class CDSClient:
             "User-Agent": "cds-mcp/0.1.0",
             "Accept": "application/json",
         })
+        
+        # Add session cookie if provided (workaround for authentication)
+        if session_cookie:
+            self.session.cookies.set("INVENIOSESSION", session_cookie, domain="cds.cern.ch")
     
     def search(
         self,

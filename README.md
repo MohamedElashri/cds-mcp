@@ -8,7 +8,49 @@ A Model Context Protocol (MCP) server for integrating with CERN Document Server 
 - **Get detailed document information** including full abstracts, authors, and metadata
 - **Access document files** with download URLs and file metadata
 - **Browse experiments and document types** for better search filtering
-- **Clean, reusable architecture** that can be extended for other CERN services
+
+## Access Limitations & Authentication
+
+**⚠️ Current Status: Public Access Only**
+
+This MCP server currently **only accesses public CDS records**. Experiment-specific restricted content (ATLAS/CMS/LHC Internal Notes, etc.) requires authentication that is not yet fully supported.
+
+### Restricted Collections
+
+The following collections in particular require experiment membership and authentication:
+- **ATLAS**: Internal Notes, Communications, Conference Slides
+- **CMS**: Internal Notes, Analysis Notes
+- **LHCb**: Internal Notes, Analysis Notes
+- **ALICE**: Internal Notes, Analysis Notes
+
+### Workaround for Restricted Access
+
+**⚠️ TEMPORARY SOLUTION**: If you need access to restricted content, you can use your browser session cookie as a workaround:
+
+1. **Log into CDS** in your browser (https://cds.cern.ch)
+2. **Extract your session cookie**:
+   - Open Developer Tools (F12)
+   - Go to Application/Storage → Cookies → https://cds.cern.ch
+   - Copy the value of `INVENIOSESSION`
+3. **Set the environment variable**:
+   ```bash
+   export CDS_SESSION_COOKIE="session_cookie_here"
+   ```
+
+**Important Notes**:
+- This is a **temporary workaround** while we develop proper authentication
+- Session cookies **expire** and need to be refreshed periodically
+- This method requires **manual cookie management**
+- **Proper CERN SSO integration** is planned for future releases
+
+I'm not sure how happy CERN IT will be happy about this approach. So please be carefull while doing it. Deal with this session cookie as a secret and don't share it with anyone.
+
+### Future Authentication
+
+We are working on implementing proper authentication through:
+- CERN Single Sign-On (SSO) integration
+- OAuth/SAML authentication flows
+- Automatic session management
 
 ## Installation
 
@@ -48,6 +90,22 @@ Add to your `claude_desktop_config.json`:
     "cds": {
       "command": "uvx",
       "args": ["cds-mcp"],
+      "env": {
+        "CDS_SESSION_COOKIE": "your_session_cookie_here"
+      }
+    }
+  }
+}
+```
+
+For **public access only**, omit the `CDS_SESSION_COOKIE`:
+
+```json
+{
+  "mcpServers": {
+    "cds": {
+      "command": "uvx",
+      "args": ["cds-mcp"],
       "env": {}
     }
   }
@@ -77,6 +135,13 @@ Global — installs for your user account (works in all projects):
 claude mcp add --scope user cds-mcp -- uvx cds-mcp
 ```
 
+To include authentication, add `-e CDS_SESSION_COOKIE=your_session_cookie_here` before the `--`:
+
+```bash
+# Example: Global installation with authentication
+claude mcp add --scope user -e CDS_SESSION_COOKIE=your_session_cookie_here cds-mcp -- uvx cds-mcp
+```
+
 Manual Configuration — you can also manually edit your global config at `~/.claude.json` (on Linux/macOS) or `%APPDATA%\Claude\claude.json` (on Windows):
 
 ```json
@@ -85,7 +150,9 @@ Manual Configuration — you can also manually edit your global config at `~/.cl
     "cds": {
       "command": "uvx",
       "args": ["cds-mcp"],
-      "env": {}
+      "env": {
+        "CDS_SESSION_COOKIE": "your_session_cookie_here"
+      }
     }
   }
 }
@@ -102,7 +169,9 @@ Add to your VS Code `settings.json`:
       "cds": {
         "command": "uvx",
         "args": ["cds-mcp"],
-        "env": {}
+        "env": {
+          "CDS_SESSION_COOKIE": "your_session_cookie_here"
+        }
       }
     }
   }
@@ -117,7 +186,9 @@ Or add a `.vscode/mcp.json` to your project:
     "cds": {
       "command": "uvx",
       "args": ["cds-mcp"],
-      "env": {}
+      "env": {
+        "CDS_SESSION_COOKIE": "your_session_cookie_here"
+      }
     }
   }
 }
@@ -133,7 +204,9 @@ Add to your `~/.gemini/settings.json`:
     "cds": {
       "command": "uvx",
       "args": ["cds-mcp"],
-      "env": {}
+      "env": {
+        "CDS_SESSION_COOKIE": "your_session_cookie_here"
+      }
     }
   }
 }
@@ -150,6 +223,9 @@ cds-mcp
 
 # Or from source
 uv run cds-mcp
+
+# With authentication
+CDS_SESSION_COOKIE=your_session_cookie_here uvx cds-mcp
 ```
 
 ## Tools
