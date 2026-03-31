@@ -17,8 +17,12 @@ build
 cds_mcp/__pycache__/*
 
 
-## typecheckers 
+## typecheckers / linters ..etc
 .mypy_cache
+.ruff_cache
+.cov
+.coverage
+coverage.xml
 
 ## all hidden folders and files
 .*
